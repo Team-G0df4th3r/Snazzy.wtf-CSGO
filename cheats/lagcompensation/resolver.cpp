@@ -476,7 +476,7 @@ void resolver::resolve(player_t* e)
 		
 		/* Team-G0df4th3r's notes:
 		* The following function is blatantly pasted from: https://github.com/undercoverTM/undercover-csgo/blob/master/resolver.cpp
-		* Its pretty shit and abuses trayray with 3 calls, this can easily be archived with 1 traceray call, dont use it.
+		* Its pretty shit and abuses traceray with 3 calls, this can easily be archived with 1 traceray call, dont use it.
 		*/
 
 				/* externs */
