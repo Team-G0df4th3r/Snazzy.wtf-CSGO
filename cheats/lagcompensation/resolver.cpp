@@ -91,12 +91,18 @@ void resolver::resolve(player_t* e)
 
 	auto animstate = e->get_animation_state();
 
+	/* Team-G0df4th3r's notes:
+	* Please do this in the animfix not here rofl.
+	*/
 	if (e->GetChokedPackets() <= 0)
 		return;
 
 	if (!animstate)
 		return;
 
+	/* Team-G0df4th3r's notes:
+	* Lol
+	*/
 	animstate->m_flGoalFeetYaw = math::normalize_yaw(e->m_angEyeAngles().y);
 
 	if (!(g_ctx.local()->is_alive()))
@@ -108,13 +114,24 @@ void resolver::resolve(player_t* e)
 
 	auto entity_index = e->EntIndex();
 
+	/* Team-G0df4th3r's notes:
+	* Use this entity for?
+	*/
 	auto entity_index2 = e->EntIndex() - 1;
 
 
 	AnimationLayer* pLayer = e->get_animlayers();
 	AnimationLayer server_animlayers[15];
+	/* Team-G0df4th3r's notes:
+	* Lol, resolver_animlayers[3][15];
+	* Remember this part
+	*/
+	
 	AnimationLayer resolver_animlayers[3][15];
 	AnimationLayer previous_animlayers[15];
+	/* Team-G0df4th3r's notes:
+	* Not even  filling the resolver_animlayers 2d array fully 
+	*/
 	memcpy(server_animlayers, resolver_animlayers, sizeof(AnimationLayer) * 15);
 
 
@@ -129,6 +146,13 @@ void resolver::resolve(player_t* e)
 	const auto jumping = !(e->m_fFlags() & FL_ONGROUND);
 
 	auto active_weapon = e->m_hActiveWeapon()->m_iItemDefinitionIndex();
+	
+	/* Team-G0df4th3r's notes:
+	* Why the fuck hardcode every value when you can just dynamically get the engine?
+	* You can replace the entire function like this:
+	*  const auto weaponData = activeWeapon->getWeaponData();
+        * const float maxSpeed = (localPlayer->isScoped() ? weaponData->maxSpeedAlt : weaponData->maxSpeed);
+	*/
 
 	if (!(e->m_bIsScoped()) && active_weapon == WEAPON_SCAR20 || active_weapon == WEAPON_G3SG1)
 	{
@@ -270,6 +294,12 @@ void resolver::resolve(player_t* e)
 
 	auto v47 = std::clamp(animstate->AbsYaw(), -360.0f, 360.0f);
 	auto v49 = math::normalize_yaw(math::angle_diff(animstate->m_flEyeYaw, v47));
+	
+	
+	/* Team-G0df4th3r's notes:
+	* Below is a very shit dumped from IDA version of Slapstik's get_max_desync_delta function
+	* Please use the following instead: https://www.unknowncheats.me/forum/2312596-post15.html
+	*/
 
 	if (animstate->m_flFeetSpeedForwardsOrSideWays >= 0.0)
 		animstate->m_flFeetSpeedForwardsOrSideWays = fminf(animstate->m_flFeetSpeedForwardsOrSideWays, 1.0);
@@ -394,6 +424,11 @@ void resolver::resolve(player_t* e)
 	}
 	else if (!(server_animlayers[ANIMATION_LAYER_LEAN].m_flWeight * 1000.0) && (server_animlayers[ANIMATION_LAYER_MOVEMENT_MOVE].m_flWeight * 1000.0) == (previous_animlayers[ANIMATION_LAYER_MOVEMENT_MOVE].m_flWeight * 1000.0)) //the shit was 1000 iirc u can double check if u want
 	{
+		/* Team-G0df4th3r's notes:
+		* The following line makese no sense: resolver_animlayers[ANIMATION_LAYER_WEAPON_ACTION_RECROUCH][ANIMATION_LAYER_MOVEMENT_MOVE] 
+		* What you actually need to do is to rebuild the animation layer for all the safepoint matrices.
+		*/
+		
 		auto first_delta = abs(server_animlayers[ANIMATION_LAYER_MOVEMENT_MOVE].m_flPlaybackRate - resolver_animlayers[ANIMATION_LAYER_AIMMATRIX][ANIMATION_LAYER_MOVEMENT_MOVE].m_flPlaybackRate);
 		auto second_delta = abs(server_animlayers[ANIMATION_LAYER_MOVEMENT_MOVE].m_flPlaybackRate - resolver_animlayers[ANIMATION_LAYER_WEAPON_ACTION_RECROUCH][ANIMATION_LAYER_MOVEMENT_MOVE].m_flPlaybackRate);
 		auto third_delta = abs(server_animlayers[ANIMATION_LAYER_MOVEMENT_MOVE].m_flPlaybackRate - resolver_animlayers[ANIMATION_LAYER_WEAPON_ACTION][ANIMATION_LAYER_MOVEMENT_MOVE].m_flPlaybackRate);
@@ -402,6 +437,11 @@ void resolver::resolve(player_t* e)
 		{
 			if (first_delta >= third_delta && second_delta > third_delta && !(third_delta * 1000.0))
 			{
+				/* Team-G0df4th3r's notes:
+				* We will never arrive here since the correct animlayer playback rates are never compared in the first place.
+				*  resolver_animlayers[ANIMATION_LAYER_WEAPON_ACTION][ANIMATION_LAYER_MOVEMENT_MOVE] // LOL 
+				* Why did they put it in a 2d array? This is what blindly pasting things you dont understand gets you.
+				*/
 				side = 1;
 			}
 		}
@@ -433,6 +473,11 @@ void resolver::resolve(player_t* e)
 
 			//if (side == 0)
 			//{
+		
+		/* Team-G0df4th3r's notes:
+		* The following function is blatantly pasted from: https://github.com/undercoverTM/undercover-csgo/blob/master/resolver.cpp
+		* Its pretty shit and abuses trayray with 3 calls, this can easily be archived with 1 traceray call, dont use it.
+		*/
 
 				/* externs */
 		Vector src3D, dst3D, forward, right, up, src, dst;
@@ -471,6 +516,11 @@ void resolver::resolve(player_t* e)
 			side = 0;
 		//}
 	}
+	
+	/* Team-G0df4th3r's notes:
+	* These idots dont know what a switch statement is.
+	* Also random side inversions based on shot amount lol.
+	*/
 
 	if (g_ctx.globals.missed_shots_reset[entity_index] == 1)
 	{
@@ -753,6 +803,10 @@ void resolver::resolve(player_t* e)
 		}
 	}*/
 
+	/* Team-G0df4th3r's notes:
+	* Different states for slowwalk and jumping is a good idea.
+	* Sadly the people who made this didnt know what they were doing and are just pasting random brute values
+	*/
 
 	if (slowwalk)
 	{
@@ -903,6 +957,13 @@ void resolver::resolve(player_t* e)
 
 				switch (g_ctx.globals.missed_shots[entity_index] % 6)
 				{
+						
+				/* Team-G0df4th3r's notes:
+				* v59 is the get_max_desync_delta of the playerm, afterwards it just brutes with 0 logic.
+				 You will be dead before even a quarter of the logic is executed
+				 */
+						
+						
 				case 0:
 					animstate->m_flGoalFeetYaw = math::normalize_yaw(e->m_angEyeAngles().y - v59);
 					break;
@@ -933,6 +994,10 @@ void resolver::resolve(player_t* e)
 			}
 			else
 			{
+				
+				/* Team-G0df4th3r's notes:
+				* This is not side inversion but the else of dormancy, lol.
+				*/
 
 				switch (g_ctx.globals.missed_shots[entity_index] % 6)
 				{
@@ -1002,6 +1067,10 @@ void resolver::resolve(player_t* e)
 			}
 			else
 			{
+				
+				/* Team-G0df4th3r's notes:
+				* Once again why do this if you 1. dont have a dormant aimbot and 2. do the same thing, completely useless if else check.
+				*/
 
 				switch (g_ctx.globals.missed_shots[entity_index] % 6)
 				{
@@ -1036,6 +1105,7 @@ void resolver::resolve(player_t* e)
 		}
 		else
 		{
+			
 			animstate->m_flGoalFeetYaw = math::normalize_yaw(e->m_angEyeAngles().y);
 
 			for (; animstate->m_flGoalFeetYaw > 180.0f; animstate->m_flGoalFeetYaw = animstate->m_flGoalFeetYaw - 360)
@@ -1047,3 +1117,5 @@ void resolver::resolve(player_t* e)
 
 }
 // le end
+
+
